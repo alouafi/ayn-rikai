@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Compose draws everything. The window only needs to be black while it starts. -->
-    <style name="Theme.AynTranslate" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.AynRikai" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@android:color/black</item>
     </style>
 
     <!-- Transparent and without animation: the activity only hosts the system consent dialog. -->
-    <style name="Theme.AynTranslate.Invisible" parent="android:Theme.Translucent.NoTitleBar">
+    <style name="Theme.AynRikai.Invisible" parent="android:Theme.Translucent.NoTitleBar">
         <item name="android:windowAnimationStyle">@null</item>
     </style>
 </resources>

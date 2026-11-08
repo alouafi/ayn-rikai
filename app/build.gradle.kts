@@ -14,18 +14,18 @@ val keystoreProperties = Properties().apply {
 }
 
 fun signingValue(key: String): String? =
-    keystoreProperties.getProperty(key) ?: System.getenv("AYN_TRANSLATE_${key.uppercase()}")
+    keystoreProperties.getProperty(key) ?: System.getenv("AYN_RIKAI_${key.uppercase()}")
 
 android {
-    namespace = "io.github.alouafi.ayntranslate"
+    namespace = "io.github.alouafi.aynrikai"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "io.github.alouafi.ayntranslate"
+        applicationId = "io.github.alouafi.aynrikai"
         minSdk = 30
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
 
         // Handhelds such as the AYN Thor are arm64. Dropping the other ABIs keeps the
         // bundled ML Kit Japanese model from tripling the APK size.

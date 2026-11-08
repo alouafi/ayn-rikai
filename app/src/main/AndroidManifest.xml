@@ -8,13 +8,13 @@
     <!-- Cleartext lets the app reach local servers such as Ollama or LM Studio, which usually
          serve plain HTTP on the home network. The user types every server URL. -->
     <application
-        android:name=".AynTranslateApp"
+        android:name=".AynRikaiApp"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/Theme.AynTranslate"
+        android:theme="@style/Theme.AynRikai"
         android:usesCleartextTraffic="true">
 
         <!-- A trampoline that opens the companion on the second screen. Its empty task affinity
@@ -44,7 +44,7 @@
             android:excludeFromRecents="true"
             android:exported="false"
             android:taskAffinity=""
-            android:theme="@style/Theme.AynTranslate.Invisible" />
+            android:theme="@style/Theme.AynRikai.Invisible" />
 
         <activity
             android:name=".ui.settings.SettingsActivity"

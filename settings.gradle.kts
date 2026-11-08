@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ayn-translate"
+rootProject.name = "ayn-rikai"
 include(":app")

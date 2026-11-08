@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">AYN Translate</string>
+    <string name="app_name" translatable="false">AYN Rikai</string>
 
     <!-- Capture -->
     <string name="capture_channel">Screen reading</string>
@@ -16,11 +16,10 @@
     <string name="action_region">Text area</string>
     <string name="action_settings">Settings</string>
     <string name="action_scan">Scan</string>
-    <string name="action_start_capture">Start screen capture</string>
+    <string name="action_start_capture">Start capture</string>
     <string name="action_open_settings">Open settings</string>
     <string name="action_dismiss">Dismiss</string>
     <string name="action_back">Back</string>
-    <string name="action_close">Close</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
     <string name="action_show">Show</string>
@@ -29,11 +28,15 @@
 
     <!-- Companion -->
     <string name="status_reading">Reading…</string>
+    <string name="action_translate">Translate</string>
+    <string name="status_translating">Translating…</string>
     <string name="no_text_found">No Japanese text on the screen.</string>
     <string name="earlier">Earlier</string>
     <string name="empty_title">Japanese games, explained</string>
-    <string name="empty_body">Start the screen capture, then press Scan whenever a dialogue appears. Tap a word for its meaning and kanji.</string>
+    <string name="empty_body">Start the screen capture, then press Scan whenever a dialogue appears. Tap any word to look it up.</string>
     <string name="empty_ready">Capture is on. Press Scan when text appears, or turn on Auto to follow the dialogue.</string>
+    <string name="mode_transcribe">Transcribe</string>
+    <string name="mode_translate">Translate</string>
 
     <!-- Errors -->
     <string name="error_no_capture">Screen capture is off. Start it to scan the game.</string>
@@ -46,9 +49,9 @@
     <string name="error_network">Network error: %1$s</string>
     <string name="error_unexpected">Something went wrong: %1$s</string>
 
-    <!-- Word and kanji pages -->
+    <!-- Lookup and kanji page -->
     <string name="word_dictionary_form">Dictionary form: %1$s</string>
-    <string name="word_kanji">Kanji</string>
+    <string name="lookup_not_found">Not in the dictionary.</string>
     <string name="kanji_not_found">Not in the kanji dictionary.</string>
     <string name="kanji_on">On</string>
     <string name="kanji_kun">Kun</string>
@@ -72,6 +75,38 @@
     <string name="pos_expression">Expression</string>
     <string name="pos_punctuation">Punctuation</string>
     <string name="pos_other">Other</string>
+    <string name="inflection_polite">polite</string>
+    <string name="inflection_negative">negative</string>
+    <string name="inflection_past">past</string>
+    <string name="inflection_te">-te form</string>
+    <string name="inflection_conditional">if (-ba)</string>
+    <string name="inflection_tara">if, when (-tara)</string>
+    <string name="inflection_tari">things like (-tari)</string>
+    <string name="inflection_volitional">let\'s (volitional)</string>
+    <string name="inflection_imperative">imperative</string>
+    <string name="inflection_potential">can (potential)</string>
+    <string name="inflection_passive">passive</string>
+    <string name="inflection_potential_or_passive">potential or passive</string>
+    <string name="inflection_causative">make, let (causative)</string>
+    <string name="inflection_causative_passive">be made to (causative passive)</string>
+    <string name="inflection_want">want to (-tai)</string>
+    <string name="inflection_progressive">-ing, state (-te iru)</string>
+    <string name="inflection_completion">completely, regret (-te shimau)</string>
+    <string name="inflection_in_advance">in advance (-te oku)</string>
+    <string name="inflection_try">try (-te miru)</string>
+    <string name="inflection_request">please (-te kudasai)</string>
+    <string name="inflection_permission">may (-te mo ii)</string>
+    <string name="inflection_must">must (-nakereba)</string>
+    <string name="inflection_must_not">must not (-te wa ikenai)</string>
+    <string name="inflection_without">without (-zu ni)</string>
+    <string name="inflection_while">while (-nagara)</string>
+    <string name="inflection_command">do it (-nasai)</string>
+    <string name="inflection_too_much">too much (-sugiru)</string>
+    <string name="inflection_seems">looks like (-sou)</string>
+    <string name="inflection_easy">easy to (-yasui)</string>
+    <string name="inflection_hard">hard to (-nikui)</string>
+    <string name="inflection_adverb">adverb (-ku)</string>
+    <string name="inflection_noun">noun (-sa)</string>
 
     <!-- Text area -->
     <string name="region_hint">Drag over the game\'s text box. Only this part of the screen is read.</string>
@@ -80,18 +115,13 @@
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
-    <string name="settings_pipeline">How to read the screen</string>
-    <string name="pipeline_vision">Vision model (recommended)</string>
-    <string name="pipeline_vision_description">One request: the model reads the screenshot, translates it and splits it into words. Needs a model that accepts images.</string>
-    <string name="pipeline_ocr_llm">OCR, then language model</string>
-    <string name="pipeline_ocr_llm_description">OCR reads the text and a text model translates it. Works with models that do not accept images.</string>
-    <string name="pipeline_ocr_only">OCR only</string>
-    <string name="pipeline_ocr_only_description">Japanese text and the kanji dictionary, without translation. Works offline with on-device OCR.</string>
-    <string name="settings_ocr">OCR</string>
-    <string name="ocr_on_device">On device</string>
-    <string name="ocr_on_device_description">Free and offline. Best on clean, large fonts.</string>
-    <string name="ocr_mistral">Mistral OCR</string>
-    <string name="ocr_mistral_description">Better on small and pixel fonts. Uses your Mistral API key.</string>
+    <string name="settings_text_source">Read the text with</string>
+    <string name="source_vision">Vision model (recommended)</string>
+    <string name="source_vision_description">The language model reads the screenshot. In Translate mode, one request reads and translates. Needs a model that accepts images.</string>
+    <string name="source_on_device">On-device OCR</string>
+    <string name="source_on_device_description">Free, offline and instant. Best on clean, large fonts.</string>
+    <string name="source_mistral">Mistral OCR</string>
+    <string name="source_mistral_description">Better on small and pixel fonts. Uses your Mistral API key.</string>
     <string name="settings_provider">Language model</string>
     <string name="provider_mistral">Mistral</string>
     <string name="provider_mistral_description">Mistral AI API with your own key.</string>
@@ -122,7 +152,7 @@
     <string name="setting_auto_scan_interval_value">Checks the screen every %1$.1f s and reads it when the text changes.</string>
     <string name="settings_about">About</string>
     <string name="about_version">Version %1$s</string>
-    <string name="about_kanjidic">Kanji data from KANJIDIC2 by the Electronic Dictionary Research and Development Group, used under the Creative Commons Attribution-ShareAlike 4.0 license.</string>
-    <string name="about_kanjidic_license">KANJIDIC2 license</string>
+    <string name="about_dictionaries">Word data from JMdict and kanji data from KANJIDIC2, by the Electronic Dictionary Research and Development Group, used under the Creative Commons Attribution-ShareAlike 4.0 license.</string>
+    <string name="about_license">EDRDG license</string>
     <string name="about_source">Source code</string>
 </resources>

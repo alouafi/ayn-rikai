@@ -7,9 +7,9 @@ Rules:
 - japanese: the text exactly as shown, character by character, with its punctuation. Copy what is written even when a more common phrase would fit: never correct or reword the game's text. Do not add spaces.
 - translation: a natural French translation that suits a game.
 - grammar: one short French sentence on the key grammar point or nuance of the line, or "" when there is nothing notable.
-- tokens: the japanese text split into words, in order. Joining every surface must give back the japanese text exactly, spaces and punctuation included.
+- tokens: the japanese text split into units of meaning, in order. Keep a verb or adjective together with all its endings and auxiliaries (食べさせられなかった, 行ってしまった, 見ている), keep compound words whole (冒険者), and keep set expressions and grammar patterns whole (かもしれない, なければならない, について). Particles are tokens of their own. Joining every surface must give back the japanese text exactly, spaces and punctuation included.
 - reading: the token's reading in hiragana. Katakana words keep their katakana. Use "" for punctuation and symbols.
-- base: the dictionary form when the token is conjugated, otherwise "".
-- meaning: a short French gloss of the token in this context, or "" for punctuation.
+- base: the dictionary form of the token's main word when it is conjugated, otherwise "".
+- meaning: a short French gloss of the token in this context, including what its endings add, or "" for punctuation.
 - pos: one of noun, verb, adjective, adverb, particle, auxiliary, pronoun, conjunction, interjection, counter, name, expression, punctuation, other.
 - If the screen has no Japanese text, answer {"lines":[]}.
