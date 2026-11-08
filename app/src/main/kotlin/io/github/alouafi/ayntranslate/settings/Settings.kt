@@ -23,7 +23,6 @@ data class Settings(
     val ocrEngine: OcrEngine = OcrEngine.ON_DEVICE,
     val mistralApiKey: String = "",
     val mistralModel: String = DEFAULT_MISTRAL_MODEL,
-    val mistralOcrModel: String = DEFAULT_MISTRAL_OCR_MODEL,
     val openAiBaseUrl: String = DEFAULT_OPENAI_BASE_URL,
     val openAiApiKey: String = "",
     val openAiModel: String = "",
@@ -40,6 +39,13 @@ data class Settings(
     val usesOcr: Boolean get() = pipeline != Pipeline.VISION
     val usesLanguageModel: Boolean get() = pipeline != Pipeline.OCR_ONLY
 
+    fun uses(provider: Provider): Boolean = usesLanguageModel && this.provider == provider
+
+    fun uses(engine: OcrEngine): Boolean = usesOcr && ocrEngine == engine
+
+    /** Mistral chat and Mistral OCR share one API key. */
+    val needsMistralKey: Boolean get() = uses(Provider.MISTRAL) || uses(OcrEngine.MISTRAL)
+
     /** English name of the translation language, as models understand it best. */
     fun targetLanguageName(): String =
         Locale.forLanguageTag(targetLanguage).getDisplayLanguage(Locale.ENGLISH).ifEmpty { "English" }
@@ -48,7 +54,6 @@ data class Settings(
         /** Small copies game text more faithfully than Medium, which tends to "fix" it. */
         const val DEFAULT_MISTRAL_MODEL = "mistral-small-latest"
         const val MEDIUM_MISTRAL_MODEL = "mistral-medium-latest"
-        const val DEFAULT_MISTRAL_OCR_MODEL = "mistral-ocr-latest"
         const val DEFAULT_OPENAI_BASE_URL = "https://api.openai.com/v1"
         const val DEFAULT_AUTO_SCAN_INTERVAL_MS = 2_000L
         val AUTO_SCAN_INTERVAL_RANGE_MS = 1_000L..10_000L

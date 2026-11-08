@@ -39,7 +39,6 @@ class SceneChangeDetectorTest {
 
         assertFalse("the first frame has nothing to settle against", detector.shouldAnalyze(frame()))
         assertTrue(detector.shouldAnalyze(frame()))
-        detector.markAnalyzed(frame())
         assertFalse("already read", detector.shouldAnalyze(frame()))
     }
 
@@ -48,7 +47,6 @@ class SceneChangeDetectorTest {
         val detector = SceneChangeDetector()
         detector.shouldAnalyze(frame())
         detector.shouldAnalyze(frame())
-        detector.markAnalyzed(frame())
 
         assertFalse(detector.shouldAnalyze(frame(changedCells = 100)))
         assertFalse(detector.shouldAnalyze(frame(changedCells = 200)))
@@ -61,7 +59,6 @@ class SceneChangeDetectorTest {
         val detector = SceneChangeDetector()
         detector.shouldAnalyze(frame(changedCells = 300))
         detector.shouldAnalyze(frame(changedCells = 300))
-        detector.markAnalyzed(frame(changedCells = 300))
 
         assertFalse(detector.shouldAnalyze(frame(changedCells = 304)))
         assertFalse(detector.shouldAnalyze(frame(changedCells = 300)))

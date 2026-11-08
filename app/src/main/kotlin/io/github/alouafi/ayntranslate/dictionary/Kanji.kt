@@ -11,7 +11,7 @@ data class Kanji(
     /** Kangxi radical number, 1-214. */
     val radical: Int?,
     val onReadings: List<String>,
-    /** Kun readings in KANJIDIC2 notation: `.` marks okurigana, `-` marks a prefix or suffix. */
+    /** Kun readings, okurigana in brackets: かた（る）. `-` marks a prefix or suffix. */
     val kunReadings: List<String>,
     val meaningsEn: List<String>,
     val meaningsFr: List<String>,

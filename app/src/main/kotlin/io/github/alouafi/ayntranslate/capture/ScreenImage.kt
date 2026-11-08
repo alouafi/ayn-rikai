@@ -1,8 +1,9 @@
-package io.github.alouafi.ayntranslate.analysis
+package io.github.alouafi.ayntranslate.capture
 
 import android.graphics.Bitmap
-import io.github.alouafi.ayntranslate.capture.toJpeg
 import io.github.alouafi.ayntranslate.llm.EncodedImage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /** One captured game screen, cropped to the reading region. */
 interface ScreenImage {
@@ -10,11 +11,9 @@ interface ScreenImage {
     val bitmap: Bitmap
 
     /** The pixels as a JPEG sized for vision models and OCR APIs. */
-    fun jpeg(): EncodedImage
+    suspend fun jpeg(): EncodedImage
 }
 
 class BitmapScreenImage(override val bitmap: Bitmap) : ScreenImage {
-    private val encoded by lazy { bitmap.toJpeg() }
-
-    override fun jpeg(): EncodedImage = encoded
+    override suspend fun jpeg(): EncodedImage = withContext(Dispatchers.Default) { bitmap.toJpeg() }
 }

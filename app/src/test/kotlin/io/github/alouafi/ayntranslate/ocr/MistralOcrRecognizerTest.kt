@@ -1,6 +1,6 @@
 package io.github.alouafi.ayntranslate.ocr
 
-import io.github.alouafi.ayntranslate.analysis.FakeScreenImage
+import io.github.alouafi.ayntranslate.capture.FakeScreenImage
 import io.github.alouafi.ayntranslate.llm.EncodedImage
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -28,7 +28,7 @@ class MistralOcrRecognizerTest {
     fun `sends the image and splits the pages into text blocks`() = runTest {
         val pages = """{"pages":[{"index":0,"markdown":"# 村長\n\nよく来たな、\n勇者よ。\n\n![img-0.jpeg](img-0.jpeg)"}],"model":"mistral-ocr-latest"}"""
         server.enqueue(MockResponse.Builder().code(200).body(pages).build())
-        val recognizer = MistralOcrRecognizer(OkHttpClient(), server.url("/v1"), "secret", "mistral-ocr-latest")
+        val recognizer = MistralOcrRecognizer(OkHttpClient(), server.url("/v1"), "secret")
 
         val blocks = recognizer.recognize(FakeScreenImage(EncodedImage(byteArrayOf(1, 2, 3), "image/jpeg")))
 

@@ -131,10 +131,11 @@ signing key, the release build is signed with the debug key.
 ```
 app/src/main/kotlin/io/github/alouafi/ayntranslate/
   analysis/    prompts, JSON parsing, and the screen readers for each mode
-  capture/     MediaProjection service, frame capture, scene change detection
+  capture/     MediaProjection service, frame capture, captured images, scene change detection
   dictionary/  offline kanji dictionary, kana and romaji helpers
-  display/     picks the second screen for the companion
+  display/     finds the second screen and opens activities on a given screen
   llm/         OpenAI-compatible chat client (Mistral uses the same API)
+  net/         JSON POST helper and API errors
   ocr/         ML Kit and Mistral OCR
   settings/    settings, encrypted keys, region
   ui/          launcher, companion (bottom screen), settings, capture consent

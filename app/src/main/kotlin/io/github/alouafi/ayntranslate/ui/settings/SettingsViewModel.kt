@@ -8,8 +8,8 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import io.github.alouafi.ayntranslate.AynTranslateApp
 import io.github.alouafi.ayntranslate.analysis.ScreenReaderFactory
+import io.github.alouafi.ayntranslate.appContainer
 import io.github.alouafi.ayntranslate.llm.ChatRequest
 import io.github.alouafi.ayntranslate.settings.Settings
 import io.github.alouafi.ayntranslate.settings.SettingsRepository
@@ -70,7 +70,7 @@ class SettingsViewModel(
 
         val Factory = viewModelFactory {
             initializer {
-                val container = (this[APPLICATION_KEY] as AynTranslateApp).container
+                val container = checkNotNull(this[APPLICATION_KEY]).appContainer
                 SettingsViewModel(container.settingsRepository, container.screenReaderFactory)
             }
         }

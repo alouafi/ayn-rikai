@@ -19,9 +19,12 @@ import java.io.Closeable
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class CaptureStoppedException : IllegalStateException("Screen capture stopped.")
+/** No frame to read right now. Auto-scan skips the tick; a manual scan tells the user. */
+sealed class FrameUnavailableException(message: String) : IllegalStateException(message)
 
-class NoFrameException : IllegalStateException("The screen sent no frame in time.")
+class CaptureStoppedException : FrameUnavailableException("Screen capture stopped.")
+
+class NoFrameException : FrameUnavailableException("The screen sent no frame in time.")
 
 /**
  * Grabs frames of the default display, which is the top screen on dual-screen handhelds.

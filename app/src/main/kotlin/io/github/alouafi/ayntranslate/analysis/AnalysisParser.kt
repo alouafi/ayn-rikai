@@ -1,7 +1,6 @@
 package io.github.alouafi.ayntranslate.analysis
 
 import io.github.alouafi.ayntranslate.dictionary.containsJapanese
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 class MalformedAnalysisException(message: String, cause: Throwable? = null) : Exception(message, cause)
@@ -21,9 +20,8 @@ object AnalysisParser {
         if (start < 0 || end < start) throw MalformedAnalysisException("The answer contains no JSON object.")
         val analysis = try {
             json.decodeFromString<Analysis>(answer.substring(start, end + 1))
-        } catch (e: SerializationException) {
-            throw MalformedAnalysisException("The answer is not a valid analysis.", e)
         } catch (e: IllegalArgumentException) {
+            // SerializationException is an IllegalArgumentException too.
             throw MalformedAnalysisException("The answer is not a valid analysis.", e)
         }
         return analysis.normalized()

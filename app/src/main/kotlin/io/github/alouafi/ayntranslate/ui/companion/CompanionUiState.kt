@@ -13,8 +13,7 @@ data class CompanionUiState(
     val capturing: Boolean = false,
     val autoScan: Boolean = false,
     val reading: Boolean = false,
-    val error: ScanError? = null,
-    val noTextFound: Boolean = false,
+    val notice: Notice? = null,
     /** Newest first. */
     val results: List<ScanResult> = emptyList(),
     /** Dictionary pages, the last one on top. */
@@ -22,6 +21,13 @@ data class CompanionUiState(
     /** The frame shown while the reading region is edited, null when the editor is closed. */
     val regionFrame: ImageBitmap? = null,
 )
+
+/** What the last scan has to say besides its results. */
+sealed interface Notice {
+    data object NoTextFound : Notice
+
+    data class Failure(val error: ScanError) : Notice
+}
 
 data class ScanResult(val id: Long, val analysis: Analysis)
 

@@ -16,18 +16,25 @@ import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.ServiceCompat
 import androidx.core.content.IntentCompat
-import io.github.alouafi.ayntranslate.AynTranslateApp
 import io.github.alouafi.ayntranslate.R
+import io.github.alouafi.ayntranslate.appContainer
 import io.github.alouafi.ayntranslate.ui.LauncherActivity
 
 /** Holds the screen capture permission while the companion runs. Android requires a foreground service for it. */
 class ScreenCaptureService : Service() {
 
     private val captureRepository: CaptureRepository
-        get() = (application as AynTranslateApp).container.captureRepository
+        get() = appContainer.captureRepository
 
     private var projection: MediaProjection? = null
     private var capturer: ScreenCapturer? = null
+
+    /** The user or the system ended the capture. */
+    private val projectionCallback = object : MediaProjection.Callback() {
+        override fun onStop() {
+            stopSelf()
+        }
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -53,7 +60,7 @@ class ScreenCaptureService : Service() {
         release()
         try {
             startCapture(resultCode, consent)
-        } catch (e: RuntimeException) {
+        } catch (_: RuntimeException) {
             release()
             stopSelf()
         }
@@ -65,14 +72,7 @@ class ScreenCaptureService : Service() {
         val projection = manager.getMediaProjection(resultCode, consent) ?: throw CaptureStoppedException()
         this.projection = projection
         // Android 14 requires the callback before the virtual display is created.
-        projection.registerCallback(
-            object : MediaProjection.Callback() {
-                override fun onStop() {
-                    stopSelf()
-                }
-            },
-            Handler(Looper.getMainLooper()),
-        )
+        projection.registerCallback(projectionCallback, Handler(Looper.getMainLooper()))
         capturer = ScreenCapturer(this, projection).also(captureRepository::publish)
     }
 
@@ -85,7 +85,11 @@ class ScreenCaptureService : Service() {
         captureRepository.publish(null)
         capturer?.close()
         capturer = null
-        projection?.stop()
+        // Unregister first: a restart releases the old projection, and its onStop must not end the new one.
+        projection?.run {
+            unregisterCallback(projectionCallback)
+            stop()
+        }
         projection = null
     }
 

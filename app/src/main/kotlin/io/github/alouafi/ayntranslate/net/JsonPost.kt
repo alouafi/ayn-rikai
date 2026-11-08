@@ -3,6 +3,7 @@ package io.github.alouafi.ayntranslate.net
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -26,17 +27,27 @@ class ApiException(val status: Int, message: String) : Exception(message)
 
 private val jsonMediaType = "application/json".toMediaType()
 
+private val json = Json {
+    ignoreUnknownKeys = true
+    coerceInputValues = true
+}
+
 /**
- * POSTs [body] to [url] and returns the decoded JSON object.
+ * POSTs [body] to [url] and decodes the answer with [answer].
  *
- * Throws [ApiException] for non-2xx answers and bodies that are not a JSON object,
- * and [IOException] for network failures.
+ * Throws [ApiException] for non-2xx answers and for bodies [answer] cannot decode,
+ * and [IOException] for network failures. An empty [apiKey] sends no `Authorization` header.
  */
-internal suspend fun OkHttpClient.postJson(url: HttpUrl, apiKey: String, body: JsonObject): JsonObject {
+internal suspend fun <T> OkHttpClient.postJson(
+    url: HttpUrl,
+    apiKey: String,
+    body: JsonObject,
+    answer: DeserializationStrategy<T>,
+): T {
     val request = Request.Builder()
         .url(url)
         .post(body.toString().toRequestBody(jsonMediaType))
-        .apply { if (apiKey.isNotBlank()) header("Authorization", "Bearer ${apiKey.trim()}") }
+        .apply { if (apiKey.isNotEmpty()) header("Authorization", "Bearer $apiKey") }
         .build()
 
     val (status, text) = newCall(request).await().use { response ->
@@ -46,10 +57,11 @@ internal suspend fun OkHttpClient.postJson(url: HttpUrl, apiKey: String, body: J
         throw ApiException(status, errorMessage(text) ?: "HTTP $status")
     }
     return try {
-        Json.parseToJsonElement(text) as? JsonObject
-    } catch (_: SerializationException) {
-        null
-    } ?: throw ApiException(status, "The server did not answer with a JSON object.")
+        json.decodeFromString(answer, text)
+    } catch (_: IllegalArgumentException) {
+        // SerializationException is an IllegalArgumentException, and so are failed checks in the answer types.
+        throw ApiException(status, "The server answered in an unexpected format.")
+    }
 }
 
 /** Pulls a human readable message out of the error formats used by OpenAI, Mistral and FastAPI servers. */

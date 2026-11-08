@@ -108,7 +108,7 @@ fun CompanionScreen(
                     settings = settings,
                     onWord = viewModel::openWord,
                     onKanji = viewModel::openKanji,
-                    onDismissError = viewModel::dismissError,
+                    onDismissNotice = viewModel::dismissNotice,
                     onOpenSettings = onOpenSettings,
                 )
             }
@@ -193,7 +193,7 @@ private fun Results(
     settings: Settings,
     onWord: (Token) -> Unit,
     onKanji: (String) -> Unit,
-    onDismissError: () -> Unit,
+    onDismissNotice: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -207,11 +207,12 @@ private fun Results(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
-        state.error?.let { error ->
-            item(key = "error") { ErrorCard(error, onDismiss = onDismissError, onOpenSettings = onOpenSettings) }
-        }
-        if (state.noTextFound) {
-            item(key = "no-text") { Hint(stringResource(R.string.no_text_found)) }
+        when (val notice = state.notice) {
+            null -> Unit
+            Notice.NoTextFound -> item(key = "no-text") { Hint(stringResource(R.string.no_text_found)) }
+            is Notice.Failure -> item(key = "error") {
+                ErrorCard(notice.error, onDismiss = onDismissNotice, onOpenSettings = onOpenSettings)
+            }
         }
         if (state.results.isEmpty()) {
             item(key = "empty") { EmptyState(state.capturing) }

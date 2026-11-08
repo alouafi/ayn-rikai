@@ -127,7 +127,7 @@ private fun KanjiRow(entry: KanjiEntry, language: String, onClick: () -> Unit) {
                 )
                 if (kanji != null) {
                     Text(
-                        (kanji.onReadings + kanji.kunReadings.map(::formatKun)).joinToString("、"),
+                        (kanji.onReadings + kanji.kunReadings).joinToString("、"),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -159,7 +159,7 @@ private fun KanjiPage(entry: KanjiEntry, language: String) {
     }
     Text(kanji.meanings(language).joinToString(", "), style = MaterialTheme.typography.titleLarge)
     Readings(R.string.kanji_on, kanji.onReadings)
-    Readings(R.string.kanji_kun, kanji.kunReadings.map(::formatKun))
+    Readings(R.string.kanji_kun, kanji.kunReadings)
 }
 
 @Composable
@@ -223,11 +223,4 @@ private fun partOfSpeech(pos: String): String {
         else -> return pos
     }
     return stringResource(label)
-}
-
-/** KANJIDIC2 writes okurigana after a dot: `かた.る` reads as かた（る）. */
-internal fun formatKun(reading: String): String {
-    val stem = reading.substringBefore('.')
-    val okurigana = reading.substringAfter('.', missingDelimiterValue = "")
-    return if (okurigana.isEmpty()) stem else "$stem（$okurigana）"
 }

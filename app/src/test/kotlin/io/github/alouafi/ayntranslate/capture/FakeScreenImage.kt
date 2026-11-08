@@ -1,4 +1,4 @@
-package io.github.alouafi.ayntranslate.analysis
+package io.github.alouafi.ayntranslate.capture
 
 import android.graphics.Bitmap
 import io.github.alouafi.ayntranslate.llm.EncodedImage
@@ -7,5 +7,5 @@ import io.github.alouafi.ayntranslate.llm.EncodedImage
 class FakeScreenImage(private val image: EncodedImage = EncodedImage(byteArrayOf(1, 2, 3), "image/jpeg")) : ScreenImage {
     override val bitmap: Bitmap get() = throw UnsupportedOperationException("No bitmaps in JVM tests")
 
-    override fun jpeg(): EncodedImage = image
+    override suspend fun jpeg(): EncodedImage = image
 }

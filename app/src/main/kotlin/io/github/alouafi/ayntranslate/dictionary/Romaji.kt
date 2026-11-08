@@ -6,39 +6,23 @@ object Romaji {
     fun fromKana(text: String): String {
         val kana = toHiragana(text)
         val out = StringBuilder()
-        var doubleNext = false
+        var geminate = false
         var i = 0
         while (i < kana.length) {
             val c = kana[i]
-            when (c) {
-                'っ' -> {
-                    doubleNext = true
-                    i++
-                    continue
-                }
-                'ー', 'ん' -> {
-                    if (c == 'ー') {
-                        out.lastOrNull { it in VOWELS }?.let(out::append)
-                    } else {
-                        out.append(if (kana.getOrNull(i + 1)?.let(::startsWithVowelOrY) == true) "n'" else "n")
-                    }
-                    doubleNext = false
-                    i++
-                    continue
-                }
-            }
-
             val digraph = if (i + 1 < kana.length) DIGRAPHS[kana.substring(i, i + 2)] else null
             val syllable = digraph ?: SYLLABLES[c]
-            if (syllable == null) {
-                out.append(c)
-                doubleNext = false
-                i++
-                continue
+            when {
+                c == 'っ' -> Unit // Doubles the consonant of the next syllable.
+                c == 'ー' -> out.lastOrNull { it in VOWELS }?.let(out::append)
+                c == 'ん' -> out.append(if (startsWithVowelOrY(kana.getOrNull(i + 1))) "n'" else "n")
+                syllable == null -> out.append(c)
+                else -> {
+                    if (geminate && syllable[0] !in VOWELS) out.append(if (syllable.startsWith("ch")) 't' else syllable[0])
+                    out.append(syllable)
+                }
             }
-            if (doubleNext && syllable[0] !in VOWELS) out.append(if (syllable.startsWith("ch")) 't' else syllable[0])
-            doubleNext = false
-            out.append(syllable)
+            geminate = c == 'っ'
             i += if (digraph != null) 2 else 1
         }
         return out.toString()
@@ -48,8 +32,8 @@ object Romaji {
         for (c in text) append(if (c in 'ァ'..'ヶ') c - KATAKANA_OFFSET else c)
     }
 
-    private fun startsWithVowelOrY(next: Char): Boolean =
-        SYLLABLES[next]?.let { it[0] in VOWELS || it[0] == 'y' } == true
+    private fun startsWithVowelOrY(next: Char?): Boolean =
+        next?.let { SYLLABLES[it] }?.let { it[0] in VOWELS || it[0] == 'y' } == true
 
     private const val KATAKANA_OFFSET = 0x60
     private const val VOWELS = "aiueo"

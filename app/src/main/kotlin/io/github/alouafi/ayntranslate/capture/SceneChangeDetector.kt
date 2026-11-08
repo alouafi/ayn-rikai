@@ -47,15 +47,15 @@ class SceneChangeDetector(private val threshold: Float = DEFAULT_THRESHOLD) {
     private var previous: FrameSignature? = null
     private var analyzed: FrameSignature? = null
 
+    /** True when [frame] shows a new scene that has settled. Call once per frame; a true answer counts the scene as read. */
     fun shouldAnalyze(frame: FrameSignature): Boolean {
-        val settled = previous?.let { frame.differenceFrom(it) <= threshold } ?: false
+        val settled = previous?.let { frame.differenceFrom(it) <= threshold } == true
         previous = frame
         if (!settled) return false
-        return analyzed?.let { frame.differenceFrom(it) > threshold } ?: true
-    }
-
-    fun markAnalyzed(frame: FrameSignature) {
+        val new = analyzed?.let { frame.differenceFrom(it) > threshold } ?: true
+        if (!new) return false
         analyzed = frame
+        return true
     }
 
     private companion object {

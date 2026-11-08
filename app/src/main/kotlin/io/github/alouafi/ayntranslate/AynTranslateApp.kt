@@ -1,6 +1,7 @@
 package io.github.alouafi.ayntranslate
 
 import android.app.Application
+import android.content.Context
 
 class AynTranslateApp : Application() {
 
@@ -12,3 +13,5 @@ class AynTranslateApp : Application() {
         container = AppContainer(this)
     }
 }
+
+val Context.appContainer: AppContainer get() = (applicationContext as AynTranslateApp).container

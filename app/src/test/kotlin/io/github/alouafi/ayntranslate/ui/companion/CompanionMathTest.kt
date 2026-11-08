@@ -21,11 +21,4 @@ class CompanionMathTest {
     fun `empty frames take no space`() {
         assertEquals(Rect.Zero, fitInside(Size(0f, 0f), Size(600f, 400f)))
     }
-
-    @Test
-    fun `kun readings show okurigana in brackets`() {
-        assertEquals("かた（る）", formatKun("かた.る"))
-        assertEquals("ひと-", formatKun("ひと-"))
-        assertEquals("いち", formatKun("いち"))
-    }
 }

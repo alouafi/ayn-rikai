@@ -80,7 +80,7 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit) {
             if (settings.needsMistralKey) {
                 MistralSection(settings, update)
             }
-            if (settings.usesLanguageModel && settings.provider == Provider.OPENAI_COMPATIBLE) {
+            if (settings.uses(Provider.OPENAI_COMPATIBLE)) {
                 OpenAiSection(settings, update)
             }
             if (settings.usesLanguageModel) {
@@ -93,70 +93,42 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit) {
     }
 }
 
-private val Settings.needsMistralKey: Boolean
-    get() = usesLanguageModel && provider == Provider.MISTRAL || usesOcr && ocrEngine == OcrEngine.MISTRAL
+private typealias SettingsUpdate = ((Settings) -> Settings) -> Unit
 
 @Composable
-private fun ReadingSection(settings: Settings, update: ((Settings) -> Settings) -> Unit) {
+private fun ReadingSection(settings: Settings, update: SettingsUpdate) {
     SectionTitle(R.string.settings_pipeline)
-    Column(Modifier.selectableGroup()) {
-        Choice(
-            title = stringResource(R.string.pipeline_vision),
-            description = stringResource(R.string.pipeline_vision_description),
-            selected = settings.pipeline == Pipeline.VISION,
-            onClick = { update { it.copy(pipeline = Pipeline.VISION) } },
-        )
-        Choice(
-            title = stringResource(R.string.pipeline_ocr_llm),
-            description = stringResource(R.string.pipeline_ocr_llm_description),
-            selected = settings.pipeline == Pipeline.OCR_THEN_LLM,
-            onClick = { update { it.copy(pipeline = Pipeline.OCR_THEN_LLM) } },
-        )
-        Choice(
-            title = stringResource(R.string.pipeline_ocr_only),
-            description = stringResource(R.string.pipeline_ocr_only_description),
-            selected = settings.pipeline == Pipeline.OCR_ONLY,
-            onClick = { update { it.copy(pipeline = Pipeline.OCR_ONLY) } },
-        )
-    }
+    ChoiceGroup(settings.pipeline, PIPELINES) { pipeline -> update { it.copy(pipeline = pipeline) } }
     if (settings.usesOcr) {
         SectionTitle(R.string.settings_ocr)
-        Column(Modifier.selectableGroup()) {
-            Choice(
-                title = stringResource(R.string.ocr_on_device),
-                description = stringResource(R.string.ocr_on_device_description),
-                selected = settings.ocrEngine == OcrEngine.ON_DEVICE,
-                onClick = { update { it.copy(ocrEngine = OcrEngine.ON_DEVICE) } },
-            )
-            Choice(
-                title = stringResource(R.string.ocr_mistral),
-                description = stringResource(R.string.ocr_mistral_description),
-                selected = settings.ocrEngine == OcrEngine.MISTRAL,
-                onClick = { update { it.copy(ocrEngine = OcrEngine.MISTRAL) } },
-            )
-        }
+        ChoiceGroup(settings.ocrEngine, OCR_ENGINES) { engine -> update { it.copy(ocrEngine = engine) } }
     }
     if (settings.usesLanguageModel) {
         SectionTitle(R.string.settings_provider)
-        Column(Modifier.selectableGroup()) {
-            Choice(
-                title = stringResource(R.string.provider_mistral),
-                description = stringResource(R.string.provider_mistral_description),
-                selected = settings.provider == Provider.MISTRAL,
-                onClick = { update { it.copy(provider = Provider.MISTRAL) } },
-            )
-            Choice(
-                title = stringResource(R.string.provider_openai),
-                description = stringResource(R.string.provider_openai_description),
-                selected = settings.provider == Provider.OPENAI_COMPATIBLE,
-                onClick = { update { it.copy(provider = Provider.OPENAI_COMPATIBLE) } },
-            )
-        }
+        ChoiceGroup(settings.provider, PROVIDERS) { provider -> update { it.copy(provider = provider) } }
     }
 }
 
+private class Option<T>(val value: T, @param:StringRes val title: Int, @param:StringRes val description: Int)
+
+private val PIPELINES = listOf(
+    Option(Pipeline.VISION, R.string.pipeline_vision, R.string.pipeline_vision_description),
+    Option(Pipeline.OCR_THEN_LLM, R.string.pipeline_ocr_llm, R.string.pipeline_ocr_llm_description),
+    Option(Pipeline.OCR_ONLY, R.string.pipeline_ocr_only, R.string.pipeline_ocr_only_description),
+)
+
+private val OCR_ENGINES = listOf(
+    Option(OcrEngine.ON_DEVICE, R.string.ocr_on_device, R.string.ocr_on_device_description),
+    Option(OcrEngine.MISTRAL, R.string.ocr_mistral, R.string.ocr_mistral_description),
+)
+
+private val PROVIDERS = listOf(
+    Option(Provider.MISTRAL, R.string.provider_mistral, R.string.provider_mistral_description),
+    Option(Provider.OPENAI_COMPATIBLE, R.string.provider_openai, R.string.provider_openai_description),
+)
+
 @Composable
-private fun MistralSection(settings: Settings, update: ((Settings) -> Settings) -> Unit) {
+private fun MistralSection(settings: Settings, update: SettingsUpdate) {
     SectionTitle(R.string.settings_mistral)
     SecretField(
         label = stringResource(R.string.field_api_key),
@@ -164,7 +136,7 @@ private fun MistralSection(settings: Settings, update: ((Settings) -> Settings) 
         onValueChange = { key -> update { it.copy(mistralApiKey = key) } },
         hint = stringResource(R.string.field_mistral_key_hint),
     )
-    if (settings.usesLanguageModel && settings.provider == Provider.MISTRAL) {
+    if (settings.uses(Provider.MISTRAL)) {
         TextField(
             label = stringResource(R.string.field_model),
             value = settings.mistralModel,
@@ -186,7 +158,7 @@ private fun MistralSection(settings: Settings, update: ((Settings) -> Settings) 
 }
 
 @Composable
-private fun OpenAiSection(settings: Settings, update: ((Settings) -> Settings) -> Unit) {
+private fun OpenAiSection(settings: Settings, update: SettingsUpdate) {
     SectionTitle(R.string.settings_openai)
     TextField(
         label = stringResource(R.string.field_base_url),
@@ -237,7 +209,7 @@ private fun ConnectionTest(check: ConnectionCheck, onTest: () -> Unit) {
 }
 
 @Composable
-private fun LanguageSection(settings: Settings, update: ((Settings) -> Settings) -> Unit) {
+private fun LanguageSection(settings: Settings, update: SettingsUpdate) {
     SectionTitle(R.string.settings_language)
     val locale = LocalLocale.current.platformLocale
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -252,7 +224,7 @@ private fun LanguageSection(settings: Settings, update: ((Settings) -> Settings)
 }
 
 @Composable
-private fun DisplaySection(settings: Settings, update: ((Settings) -> Settings) -> Unit) {
+private fun DisplaySection(settings: Settings, update: SettingsUpdate) {
     SectionTitle(R.string.settings_display)
     Toggle(
         title = stringResource(R.string.setting_furigana),
@@ -327,6 +299,20 @@ private fun SectionTitle(@StringRes title: Int) {
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
         )
+    }
+}
+
+@Composable
+private fun <T> ChoiceGroup(selected: T, options: List<Option<T>>, onSelect: (T) -> Unit) {
+    Column(Modifier.selectableGroup()) {
+        options.forEach { option ->
+            Choice(
+                title = stringResource(option.title),
+                description = stringResource(option.description),
+                selected = selected == option.value,
+                onClick = { onSelect(option.value) },
+            )
+        }
     }
 }
 

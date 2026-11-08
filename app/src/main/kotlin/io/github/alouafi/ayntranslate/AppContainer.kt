@@ -24,7 +24,5 @@ class AppContainer(context: Context) {
         .callTimeout(2, TimeUnit.MINUTES)
         .build()
 
-    private val onDeviceRecognizer by lazy { MlKitJapaneseRecognizer() }
-
-    val screenReaderFactory = ScreenReaderFactory(httpClient) { onDeviceRecognizer }
+    val screenReaderFactory = ScreenReaderFactory(httpClient, MlKitJapaneseRecognizer())
 }

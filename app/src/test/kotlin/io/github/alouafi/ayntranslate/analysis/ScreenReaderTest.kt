@@ -1,5 +1,6 @@
 package io.github.alouafi.ayntranslate.analysis
 
+import io.github.alouafi.ayntranslate.capture.FakeScreenImage
 import io.github.alouafi.ayntranslate.llm.ChatModel
 import io.github.alouafi.ayntranslate.llm.ChatRequest
 import io.github.alouafi.ayntranslate.llm.EncodedImage
@@ -35,7 +36,6 @@ class ScreenReaderTest {
         assertSame(image, request.image)
         assertEquals(AnalysisPrompt.forScreenshot("English"), request.system)
         assertEquals(AnalysisPrompt.SCREENSHOT_REQUEST, request.user)
-        assertTrue(request.jsonOutput)
         assertEquals("Yes", analysis.lines.single().translation)
     }
 
@@ -54,10 +54,10 @@ class ScreenReaderTest {
     }
 
     @Test
-    fun `OCR reader without a model returns the Japanese text only`() = runTest {
+    fun `OCR-only reader returns the Japanese text only`() = runTest {
         val recognizer = TextRecognizer { listOf("はい、\n わかりました。", "Start", "メニュー") }
 
-        val analysis = OcrScreenReader(recognizer, model = null, "English").read(FakeScreenImage())
+        val analysis = OcrOnlyScreenReader(recognizer).read(FakeScreenImage())
 
         assertEquals(listOf("はい、わかりました。", "メニュー"), analysis.lines.map { it.japanese })
         assertTrue(analysis.lines.all { it.tokens.isEmpty() && it.translation.isEmpty() })

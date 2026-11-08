@@ -1,15 +1,9 @@
 package io.github.alouafi.ayntranslate.ocr
 
-import io.github.alouafi.ayntranslate.analysis.ScreenImage
-import io.github.alouafi.ayntranslate.net.ApiException
+import io.github.alouafi.ayntranslate.capture.ScreenImage
 import io.github.alouafi.ayntranslate.net.postJson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 import okhttp3.HttpUrl
@@ -20,28 +14,32 @@ class MistralOcrRecognizer(
     private val http: OkHttpClient,
     baseUrl: HttpUrl,
     private val apiKey: String,
-    private val model: String,
 ) : TextRecognizer {
 
     private val endpoint = baseUrl.newBuilder().addPathSegment("ocr").build()
 
     override suspend fun recognize(screen: ScreenImage): List<String> {
-        val image = withContext(Dispatchers.Default) { screen.jpeg() }
         val body = buildJsonObject {
-            put("model", model)
+            put("model", MODEL)
             putJsonObject("document") {
                 put("type", "image_url")
-                put("image_url", image.dataUrl())
+                put("image_url", screen.jpeg().dataUrl())
             }
         }
-        val pages = http.postJson(endpoint, apiKey, body)["pages"] as? JsonArray
-            ?: throw ApiException(200, "The OCR answer has no pages.")
-        val markdown = pages.joinToString("\n\n") { page ->
-            ((page as? JsonObject)?.get("markdown") as? JsonPrimitive)?.contentOrNull.orEmpty()
-        }
-        return markdownBlocks(markdown)
+        val answer = http.postJson(endpoint, apiKey, body, OcrAnswer.serializer())
+        return markdownBlocks(answer.pages.joinToString("\n\n") { it.markdown })
+    }
+
+    private companion object {
+        const val MODEL = "mistral-ocr-latest"
     }
 }
+
+@Serializable
+private class OcrAnswer(val pages: List<Page>)
+
+@Serializable
+private class Page(val markdown: String = "")
 
 private val IMAGE = Regex("""!\[[^\]]*]\([^)]*\)""")
 private val HEADING = Regex("""^\s{0,3}#{1,6}\s+""")

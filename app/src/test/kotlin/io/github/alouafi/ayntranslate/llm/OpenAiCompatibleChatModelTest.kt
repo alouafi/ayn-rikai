@@ -80,13 +80,12 @@ class OpenAiCompatibleChatModelTest {
     fun `works with a trailing slash and without a key`() = runTest {
         server.enqueue(answer("\"pong\""))
 
-        val text = model(apiKey = "", basePath = "/v1/").complete(textRequest.copy(jsonOutput = false))
+        val text = model(apiKey = "", basePath = "/v1/").complete(textRequest)
 
         assertEquals("pong", text)
         val request = server.takeRequest()
         assertEquals("/v1/chat/completions", request.url.encodedPath)
         assertNull(request.headers["Authorization"])
-        assertFalse(request.json().containsKey("response_format"))
         assertTrue(request.json()["messages"]!!.jsonArray[1].jsonObject["content"] !is JsonArray)
     }
 
@@ -143,7 +142,9 @@ class OpenAiCompatibleChatModelTest {
     @Test
     fun `an answer without choices is an API error`() = runTest {
         server.enqueue(MockResponse.Builder().code(200).body("""{"object":"error"}""").build())
+        server.enqueue(MockResponse.Builder().code(200).body("""{"choices":[]}""").build())
 
-        apiError()
+        assertEquals(200, apiError().status)
+        assertEquals(200, apiError().status)
     }
 }

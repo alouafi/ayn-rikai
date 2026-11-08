@@ -7,14 +7,14 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import io.github.alouafi.ayntranslate.AynTranslateApp
 import io.github.alouafi.ayntranslate.analysis.Analysis
-import io.github.alouafi.ayntranslate.analysis.BitmapScreenImage
 import io.github.alouafi.ayntranslate.analysis.ScreenReaderFactory
 import io.github.alouafi.ayntranslate.analysis.Token
+import io.github.alouafi.ayntranslate.appContainer
+import io.github.alouafi.ayntranslate.capture.BitmapScreenImage
 import io.github.alouafi.ayntranslate.capture.CaptureRepository
 import io.github.alouafi.ayntranslate.capture.CaptureStoppedException
-import io.github.alouafi.ayntranslate.capture.NoFrameException
+import io.github.alouafi.ayntranslate.capture.FrameUnavailableException
 import io.github.alouafi.ayntranslate.capture.SceneChangeDetector
 import io.github.alouafi.ayntranslate.capture.crop
 import io.github.alouafi.ayntranslate.capture.signature
@@ -65,8 +65,8 @@ class CompanionViewModel(
             .onEach { capturer ->
                 val capturing = capturer != null
                 mutableState.update {
-                    val solved = capturing && it.error == ScanError.NoCapture
-                    it.copy(capturing = capturing, error = if (solved) null else it.error)
+                    val solved = capturing && it.notice == Notice.Failure(ScanError.NoCapture)
+                    it.copy(capturing = capturing, notice = if (solved) null else it.notice)
                 }
                 if (!capturing) setAutoScan(false)
             }
@@ -74,7 +74,7 @@ class CompanionViewModel(
     }
 
     fun scan() {
-        viewModelScope.launch { scanOnce(detector = null) }
+        viewModelScope.launch { exclusiveScan { settings -> whileReading { read(capture(settings), settings) } } }
     }
 
     fun setAutoScan(enabled: Boolean) {
@@ -83,50 +83,61 @@ class CompanionViewModel(
         mutableState.update { it.copy(autoScan = autoScanJob != null) }
     }
 
+    /** Reads the screen whenever the picture shows a new scene that has settled. */
     private suspend fun autoScan() {
         val detector = SceneChangeDetector()
         while (true) {
-            scanOnce(detector)
+            exclusiveScan { settings ->
+                // Auto-scan tries again on its next tick, so a missed frame is not worth a message.
+                val image = try {
+                    capture(settings)
+                } catch (_: FrameUnavailableException) {
+                    return@exclusiveScan
+                }
+                val signature = withContext(Dispatchers.Default) { image.signature() }
+                if (detector.shouldAnalyze(signature)) whileReading { read(image, settings) }
+            }
             delay(currentSettings().autoScanIntervalMs)
         }
     }
 
-    /** Captures and reads the screen. With a [detector], reads only when the scene changed and settled. */
-    private suspend fun scanOnce(detector: SceneChangeDetector?) {
+    /** Runs [scan] unless another scan is running, and shows what goes wrong. */
+    private suspend fun exclusiveScan(scan: suspend (Settings) -> Unit) {
         if (!scanMutex.tryLock()) return
-        val manual = detector == null
         try {
-            val capturer = captureRepository.capturer.value
-            if (capturer == null) {
-                if (manual) showError(ScanError.NoCapture)
-                return
-            }
-            val settings = currentSettings()
-            if (manual) mutableState.update { it.copy(reading = true) }
-            val frame = capturer.capture().also { lastFrame = it }
-            val image = withContext(Dispatchers.Default) { frame.crop(settings.region) }
-            if (detector != null) {
-                val signature = withContext(Dispatchers.Default) { image.signature() }
-                if (!detector.shouldAnalyze(signature)) return
-                detector.markAnalyzed(signature)
-                mutableState.update { it.copy(reading = true) }
-            }
-            publish(readerFactory.create(settings).read(BitmapScreenImage(image)))
+            scan(currentSettings())
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            // Auto-scan tries again on its next tick, so a missed frame is not worth a message.
-            val missedFrame = e is NoFrameException || e is CaptureStoppedException
-            if (manual || !missedFrame) showError(e.toScanError())
+            showError(e.toScanError())
         } finally {
-            mutableState.update { it.copy(reading = false) }
             scanMutex.unlock()
         }
     }
 
+    /** The reading region of a fresh frame. */
+    private suspend fun capture(settings: Settings): Bitmap {
+        val capturer = captureRepository.capturer.value ?: throw CaptureStoppedException()
+        val frame = capturer.capture().also { lastFrame = it }
+        return withContext(Dispatchers.Default) { frame.crop(settings.region) }
+    }
+
+    private suspend fun whileReading(block: suspend () -> Unit) {
+        mutableState.update { it.copy(reading = true) }
+        try {
+            block()
+        } finally {
+            mutableState.update { it.copy(reading = false) }
+        }
+    }
+
+    private suspend fun read(image: Bitmap, settings: Settings) {
+        publish(readerFactory.create(settings).read(BitmapScreenImage(image)))
+    }
+
     private fun publish(analysis: Analysis) {
         if (analysis.lines.isEmpty()) {
-            mutableState.update { it.copy(noTextFound = true, error = null) }
+            mutableState.update { it.copy(notice = Notice.NoTextFound) }
             return
         }
         val result = ScanResult(nextResultId++, analysis)
@@ -135,7 +146,7 @@ class CompanionViewModel(
             val latest = state.results.firstOrNull()?.analysis
             val sameText = latest?.lines?.map { it.japanese } == analysis.lines.map { it.japanese }
             val older = if (sameText) state.results.drop(1) else state.results
-            state.copy(results = (listOf(result) + older).take(MAX_RESULTS), noTextFound = false, error = null)
+            state.copy(results = (listOf(result) + older).take(MAX_RESULTS), notice = null)
         }
     }
 
@@ -198,12 +209,12 @@ class CompanionViewModel(
         mutableState.update { it.copy(regionFrame = null) }
     }
 
-    fun dismissError() {
-        mutableState.update { it.copy(error = null) }
+    fun dismissNotice() {
+        mutableState.update { it.copy(notice = null) }
     }
 
     private fun showError(error: ScanError) {
-        mutableState.update { it.copy(error = error, noTextFound = false) }
+        mutableState.update { it.copy(notice = Notice.Failure(error)) }
     }
 
     private suspend fun currentSettings(): Settings = state.value.settings ?: settingsRepository.settings.first()
@@ -213,7 +224,7 @@ class CompanionViewModel(
 
         val Factory = viewModelFactory {
             initializer {
-                val container = (this[APPLICATION_KEY] as AynTranslateApp).container
+                val container = checkNotNull(this[APPLICATION_KEY]).appContainer
                 CompanionViewModel(
                     container.settingsRepository,
                     container.captureRepository,

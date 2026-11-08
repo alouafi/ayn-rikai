@@ -26,11 +26,18 @@ class KanjiDictionaryTest {
         assertEquals(2, word.grade)
         assertEquals(301, word.frequency)
         assertEquals(listOf("ゴ"), word.onReadings)
-        assertEquals(listOf("かた.る", "かた.らう"), word.kunReadings)
+        assertEquals(listOf("かた（る）", "かた（らう）"), word.kunReadings)
         val gloom = entries.getValue("鬱")
         assertNull(gloom.grade)
         assertNull(gloom.frequency)
         assertTrue(gloom.meaningsFr.isEmpty())
+    }
+
+    @Test
+    fun `kun readings show okurigana in brackets and keep prefix marks`() {
+        val one = parseKanjiTsv(sequenceOf("一\t1\t1\t2\t1\tイチ\tひと-|ひと.つ|いち\tone\tun")).getValue("一")
+
+        assertEquals(listOf("ひと-", "ひと（つ）", "いち"), one.kunReadings)
     }
 
     @Test

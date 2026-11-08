@@ -13,7 +13,7 @@ import org.junit.Test
 
 class ScreenReaderFactoryTest {
 
-    private val factory = ScreenReaderFactory(OkHttpClient()) { TextRecognizer { emptyList() } }
+    private val factory = ScreenReaderFactory(OkHttpClient(), TextRecognizer { emptyList() })
 
     private fun missing(settings: Settings): MissingSetting =
         assertThrows(MissingConfigurationException::class.java) { factory.create(settings) }.setting
@@ -40,6 +40,6 @@ class ScreenReaderFactoryTest {
     fun `on-device OCR alone needs no configuration`() {
         val reader = factory.create(Settings(pipeline = Pipeline.OCR_ONLY, ocrEngine = OcrEngine.ON_DEVICE))
 
-        assertTrue(reader is OcrScreenReader)
+        assertTrue(reader is OcrOnlyScreenReader)
     }
 }

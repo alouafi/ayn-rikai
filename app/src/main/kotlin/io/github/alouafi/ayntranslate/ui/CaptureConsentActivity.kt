@@ -1,6 +1,5 @@
 package io.github.alouafi.ayntranslate.ui
 
-import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
 import android.media.projection.MediaProjectionConfig
@@ -11,6 +10,7 @@ import android.view.Display
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import io.github.alouafi.ayntranslate.capture.ScreenCaptureService
+import io.github.alouafi.ayntranslate.display.startActivityOnDisplay
 
 /**
  * Asks for the screen capture consent from the game screen, then disappears.
@@ -46,12 +46,7 @@ class CaptureConsentActivity : ComponentActivity() {
     companion object {
         fun start(context: Context) {
             val intent = Intent(context, CaptureConsentActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            val options = ActivityOptions.makeBasic().setLaunchDisplayId(Display.DEFAULT_DISPLAY)
-            try {
-                context.startActivity(intent, options.toBundle())
-            } catch (_: SecurityException) {
-                context.startActivity(intent)
-            }
+            context.startActivityOnDisplay(intent, Display.DEFAULT_DISPLAY)
         }
     }
 }

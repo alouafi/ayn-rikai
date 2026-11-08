@@ -39,12 +39,19 @@ private fun parseKanjiRow(row: String): Kanji? {
         frequency = fields[3].toIntOrNull(),
         radical = fields[4].toIntOrNull(),
         onReadings = fields[5].toList(),
-        kunReadings = fields[6].toList(),
+        kunReadings = fields[6].toList().map(::formatKun),
         meaningsEn = fields[7].toList(),
         meaningsFr = fields[8].toList(),
     )
 }
 
 private fun String.toList(): List<String> = if (isEmpty()) emptyList() else split('|')
+
+/** KANJIDIC2 writes okurigana after a dot: `かた.る` reads as かた（る）. */
+private fun formatKun(reading: String): String {
+    val stem = reading.substringBefore('.')
+    val okurigana = reading.substringAfter('.', missingDelimiterValue = "")
+    return if (okurigana.isEmpty()) stem else "$stem（$okurigana）"
+}
 
 private const val FIELD_COUNT = 9
