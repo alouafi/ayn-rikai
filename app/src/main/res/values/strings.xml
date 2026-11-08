@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">AYN Translate</string>
+
+    <!-- Capture -->
+    <string name="capture_channel">Screen reading</string>
+    <string name="capture_notification_title">Reading the game screen</string>
+    <string name="capture_notification_text">Screenshots are taken only when you scan or when Auto is on.</string>
+    <string name="capture_stop">Stop</string>
+    <string name="capture_on">Capture on</string>
+    <string name="capture_off">Capture off</string>
+
+    <!-- Actions -->
+    <string name="action_stop_capture">Stop capture</string>
+    <string name="action_auto">Auto</string>
+    <string name="action_region">Text area</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_scan">Scan</string>
+    <string name="action_start_capture">Start screen capture</string>
+    <string name="action_open_settings">Open settings</string>
+    <string name="action_dismiss">Dismiss</string>
+    <string name="action_back">Back</string>
+    <string name="action_close">Close</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+    <string name="action_show">Show</string>
+    <string name="action_hide">Hide</string>
+    <string name="action_test_connection">Test connection</string>
+
+    <!-- Companion -->
+    <string name="status_reading">Reading…</string>
+    <string name="no_text_found">No Japanese text on the screen.</string>
+    <string name="earlier">Earlier</string>
+    <string name="empty_title">Japanese games, explained</string>
+    <string name="empty_body">Start the screen capture, then press Scan whenever a dialogue appears. Tap a word for its meaning and kanji.</string>
+    <string name="empty_ready">Capture is on. Press Scan when text appears, or turn on Auto to follow the dialogue.</string>
+
+    <!-- Errors -->
+    <string name="error_no_capture">Screen capture is off. Start it to scan the game.</string>
+    <string name="error_no_frame">The game screen did not refresh. Try again.</string>
+    <string name="error_unreadable">The model answer could not be read. Try again, or pick a stronger model.</string>
+    <string name="error_missing_mistral_key">Add your Mistral API key in the settings.</string>
+    <string name="error_missing_base_url">The server URL in the settings is not valid.</string>
+    <string name="error_missing_model">Choose a model in the settings.</string>
+    <string name="error_api">The server refused the request (%1$d): %2$s</string>
+    <string name="error_network">Network error: %1$s</string>
+    <string name="error_unexpected">Something went wrong: %1$s</string>
+
+    <!-- Word and kanji pages -->
+    <string name="word_dictionary_form">Dictionary form: %1$s</string>
+    <string name="word_kanji">Kanji</string>
+    <string name="kanji_not_found">Not in the kanji dictionary.</string>
+    <string name="kanji_on">On</string>
+    <string name="kanji_kun">Kun</string>
+    <string name="kanji_strokes">Strokes: %1$d</string>
+    <string name="kanji_grade_school">School grade %1$d</string>
+    <string name="kanji_grade_joyo">Jōyō, secondary school</string>
+    <string name="kanji_grade_names">Used in names</string>
+    <string name="kanji_radical">Radical %1$s (%2$d)</string>
+    <string name="kanji_frequency">Frequency rank: %1$d</string>
+    <string name="pos_noun">Noun</string>
+    <string name="pos_verb">Verb</string>
+    <string name="pos_adjective">Adjective</string>
+    <string name="pos_adverb">Adverb</string>
+    <string name="pos_particle">Particle</string>
+    <string name="pos_auxiliary">Auxiliary</string>
+    <string name="pos_pronoun">Pronoun</string>
+    <string name="pos_conjunction">Conjunction</string>
+    <string name="pos_interjection">Interjection</string>
+    <string name="pos_counter">Counter</string>
+    <string name="pos_name">Name</string>
+    <string name="pos_expression">Expression</string>
+    <string name="pos_punctuation">Punctuation</string>
+    <string name="pos_other">Other</string>
+
+    <!-- Text area -->
+    <string name="region_hint">Drag over the game\'s text box. Only this part of the screen is read.</string>
+    <string name="region_frame">Game screen</string>
+    <string name="region_whole_screen">Whole screen</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_pipeline">How to read the screen</string>
+    <string name="pipeline_vision">Vision model (recommended)</string>
+    <string name="pipeline_vision_description">One request: the model reads the screenshot, translates it and splits it into words. Needs a model that accepts images.</string>
+    <string name="pipeline_ocr_llm">OCR, then language model</string>
+    <string name="pipeline_ocr_llm_description">OCR reads the text and a text model translates it. Works with models that do not accept images.</string>
+    <string name="pipeline_ocr_only">OCR only</string>
+    <string name="pipeline_ocr_only_description">Japanese text and the kanji dictionary, without translation. Works offline with on-device OCR.</string>
+    <string name="settings_ocr">OCR</string>
+    <string name="ocr_on_device">On device</string>
+    <string name="ocr_on_device_description">Free and offline. Best on clean, large fonts.</string>
+    <string name="ocr_mistral">Mistral OCR</string>
+    <string name="ocr_mistral_description">Better on small and pixel fonts. Uses your Mistral API key.</string>
+    <string name="settings_provider">Language model</string>
+    <string name="provider_mistral">Mistral</string>
+    <string name="provider_mistral_description">Mistral AI API with your own key.</string>
+    <string name="provider_openai">OpenAI-compatible</string>
+    <string name="provider_openai_description">OpenAI, OpenRouter, Ollama, LM Studio, vLLM or any /chat/completions server.</string>
+    <string name="settings_mistral">Mistral</string>
+    <string name="field_api_key">API key</string>
+    <string name="field_api_key_optional">API key (optional)</string>
+    <string name="field_mistral_key_hint">Create one at console.mistral.ai. It stays encrypted on this device.</string>
+    <string name="field_model">Model</string>
+    <string name="model_small">Small: recommended</string>
+    <string name="model_medium">Medium</string>
+    <string name="settings_openai">OpenAI-compatible server</string>
+    <string name="field_base_url">Base URL</string>
+    <string name="field_base_url_hint">For example https://api.openai.com/v1, https://openrouter.ai/api/v1 or http://192.168.1.20:11434/v1 for Ollama.</string>
+    <string name="field_model_vision_hint">A model that accepts images, such as gpt-4.1-mini or qwen2.5vl.</string>
+    <string name="field_model_text_hint">Any chat model, such as gpt-4.1-mini or qwen3.</string>
+    <string name="connection_ok">Connected</string>
+    <string name="settings_language">Translate into</string>
+    <string name="settings_display">Display</string>
+    <string name="setting_furigana">Furigana</string>
+    <string name="setting_furigana_description">Readings above words that contain kanji.</string>
+    <string name="setting_romaji">Romaji</string>
+    <string name="setting_romaji_description">The line in Latin letters, below the Japanese.</string>
+    <string name="setting_keep_controller">Keep the controller on the game</string>
+    <string name="setting_keep_controller_description">Touching this screen does not take the buttons away from the game.</string>
+    <string name="setting_auto_scan_interval">Auto scan</string>
+    <string name="setting_auto_scan_interval_value">Checks the screen every %1$.1f s and reads it when the text changes.</string>
+    <string name="settings_about">About</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_kanjidic">Kanji data from KANJIDIC2 by the Electronic Dictionary Research and Development Group, used under the Creative Commons Attribution-ShareAlike 4.0 license.</string>
+    <string name="about_kanjidic_license">KANJIDIC2 license</string>
+    <string name="about_source">Source code</string>
+</resources>

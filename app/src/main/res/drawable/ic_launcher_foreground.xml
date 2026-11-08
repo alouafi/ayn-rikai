@@ -1,0 +1,28 @@
+<!-- An AYN Thor-like handheld: a game dialogue on the top screen, a dictionary entry below. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFECE6E4"
+        android:pathData="M37,28h34a3,3 0,0 1,3 3v16a3,3 0,0 1,-3 3h-34a3,3 0,0 1,-3 -3v-16a3,3 0,0 1,3 -3z" />
+    <path
+        android:fillColor="#FF151211"
+        android:pathData="M36.5,30.5h35v17h-35z" />
+    <path
+        android:fillColor="#FFFF7A59"
+        android:pathData="M39,41h30v4.5h-30z" />
+    <path
+        android:fillColor="#FFECE6E4"
+        android:pathData="M39,54h30a3,3 0,0 1,3 3v18a3,3 0,0 1,-3 3h-30a3,3 0,0 1,-3 -3v-18a3,3 0,0 1,3 -3z" />
+    <path
+        android:fillColor="#FF151211"
+        android:pathData="M38.5,56.5h31v19h-31z" />
+    <path
+        android:fillColor="#FFFF7A59"
+        android:pathData="M41,59.5h10v5h-10z" />
+    <path
+        android:fillColor="#FFC9BEBA"
+        android:pathData="M41,67h26v2h-26z M41,71h19v2h-19z" />
+</vector>
