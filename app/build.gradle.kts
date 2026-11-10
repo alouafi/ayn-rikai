@@ -24,8 +24,8 @@ android {
         applicationId = "io.github.alouafi.aynrikai"
         minSdk = 30
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
 
         // Handhelds such as the AYN Thor are arm64. Dropping the other ABIs keeps the
         // bundled ML Kit Japanese model from tripling the APK size.

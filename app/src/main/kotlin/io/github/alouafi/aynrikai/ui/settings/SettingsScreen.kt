@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import io.github.alouafi.aynrikai.BuildConfig
 import io.github.alouafi.aynrikai.R
 import io.github.alouafi.aynrikai.settings.Provider
+import io.github.alouafi.aynrikai.settings.ReasoningEffort
 import io.github.alouafi.aynrikai.settings.Settings
 import io.github.alouafi.aynrikai.settings.TextSource
 import io.github.alouafi.aynrikai.ui.text
@@ -140,6 +141,12 @@ private fun MistralSection(settings: Settings, update: SettingsUpdate) {
                 label = { Text(stringResource(R.string.model_medium)) },
             )
         }
+        Toggle(
+            title = stringResource(R.string.setting_reasoning),
+            description = stringResource(R.string.setting_reasoning_description),
+            checked = settings.mistralReasoning,
+            onCheckedChange = { checked -> update { it.copy(mistralReasoning = checked) } },
+        )
     }
 }
 
@@ -170,7 +177,30 @@ private fun OpenAiSection(settings: Settings, update: SettingsUpdate) {
             },
         ),
     )
+    Labels(
+        stringResource(R.string.setting_reasoning_effort),
+        stringResource(R.string.setting_reasoning_effort_description),
+        Modifier.padding(top = 8.dp),
+    )
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        ReasoningEffort.entries.forEach { effort ->
+            FilterChip(
+                selected = settings.openAiReasoningEffort == effort,
+                onClick = { update { it.copy(openAiReasoningEffort = effort) } },
+                label = { Text(stringResource(effort.label)) },
+            )
+        }
+    }
 }
+
+private val ReasoningEffort.label: Int
+    @StringRes get() = when (this) {
+        ReasoningEffort.DEFAULT -> R.string.reasoning_default
+        ReasoningEffort.NONE -> R.string.reasoning_none
+        ReasoningEffort.LOW -> R.string.reasoning_low
+        ReasoningEffort.MEDIUM -> R.string.reasoning_medium
+        ReasoningEffort.HIGH -> R.string.reasoning_high
+    }
 
 @Composable
 private fun ConnectionTest(check: ConnectionCheck, onTest: () -> Unit) {

@@ -180,13 +180,14 @@ class CompanionViewModel(
         }
     }
 
-    /** Translates a transcribed result in place. */
+    /** Adds a translation under each line of a transcribed result. The lines and the open lookup stay as they are. */
     fun translate(resultId: Long) {
         val result = state.value.results.firstOrNull { it.id == resultId && it.stage == Stage.TRANSCRIBED } ?: return
         setStage(resultId, Stage.TRANSLATING)
         viewModelScope.launch {
-            val analysis = try {
-                withWholeWords(readerFactory.analyzer(currentSettings()).analyze(result.analysis.lines.map { it.japanese }))
+            val lines = result.analysis.lines
+            val translations = try {
+                readerFactory.translator(currentSettings()).translate(lines.map { it.japanese })
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -194,15 +195,12 @@ class CompanionViewModel(
                 showError(e.toScanError())
                 return@launch
             }
-            if (analysis.lines.isEmpty()) {
-                setStage(resultId, Stage.TRANSCRIBED)
-                showError(ScanError.Unreadable)
-                return@launch
-            }
+            val analysis = result.analysis.copy(
+                lines = lines.zip(translations) { line, translation -> line.copy(translation = translation) },
+            )
             mutableState.update { state ->
                 state.copy(
                     results = state.results.map { if (it.id == resultId) it.copy(analysis = analysis, stage = Stage.TRANSLATED) else it },
-                    lookup = state.lookup?.takeUnless { it.resultId == resultId },
                 )
             }
         }

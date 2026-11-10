@@ -8,6 +8,7 @@ import io.github.alouafi.aynrikai.analysis.MissingConfigurationException
 import io.github.alouafi.aynrikai.analysis.MissingSetting
 import io.github.alouafi.aynrikai.capture.CaptureStoppedException
 import io.github.alouafi.aynrikai.capture.NoFrameException
+import io.github.alouafi.aynrikai.llm.TruncatedAnswerException
 import io.github.alouafi.aynrikai.net.ApiException
 import java.io.IOException
 
@@ -16,6 +17,7 @@ sealed interface ScanError {
     data object NoCapture : ScanError
     data object NoFrame : ScanError
     data object Unreadable : ScanError
+    data object TooLong : ScanError
     data class MissingConfiguration(val setting: MissingSetting) : ScanError
     data class Api(val status: Int, val message: String) : ScanError
     data class Network(val message: String) : ScanError
@@ -30,6 +32,7 @@ fun Throwable.toScanError(): ScanError = when (this) {
     is MissingConfigurationException -> ScanError.MissingConfiguration(setting)
     is ApiException -> ScanError.Api(status, message.orEmpty())
     is MalformedAnalysisException -> ScanError.Unreadable
+    is TruncatedAnswerException -> ScanError.TooLong
     is NoFrameException -> ScanError.NoFrame
     is CaptureStoppedException -> ScanError.NoCapture
     is IOException -> ScanError.Network(message ?: javaClass.simpleName)
@@ -41,6 +44,7 @@ fun ScanError.text(): String = when (this) {
     ScanError.NoCapture -> stringResource(R.string.error_no_capture)
     ScanError.NoFrame -> stringResource(R.string.error_no_frame)
     ScanError.Unreadable -> stringResource(R.string.error_unreadable)
+    ScanError.TooLong -> stringResource(R.string.error_too_long)
     is ScanError.MissingConfiguration -> stringResource(
         when (setting) {
             MissingSetting.MISTRAL_API_KEY -> R.string.error_missing_mistral_key

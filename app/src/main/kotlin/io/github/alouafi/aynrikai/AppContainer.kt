@@ -24,10 +24,11 @@ class AppContainer(context: Context) {
         openIndex = { context.assets.open("word_index.tsv") },
     )
 
+    // Models send nothing until the whole answer is written, which can take minutes with reasoning on a busy screen.
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(90, TimeUnit.SECONDS)
-        .callTimeout(2, TimeUnit.MINUTES)
+        .readTimeout(3, TimeUnit.MINUTES)
+        .callTimeout(3, TimeUnit.MINUTES)
         .build()
 
     val screenReaderFactory = ScreenReaderFactory(httpClient, MlKitJapaneseRecognizer())

@@ -42,6 +42,7 @@
     <string name="error_no_capture">Screen capture is off. Start it to scan the game.</string>
     <string name="error_no_frame">The game screen did not refresh. Try again.</string>
     <string name="error_unreadable">The model answer could not be read. Try again, or pick a stronger model.</string>
+    <string name="error_too_long">The answer was too long and got cut off. Select only the text box with the crop icon, or turn reasoning off.</string>
     <string name="error_missing_mistral_key">Add your Mistral API key in the settings.</string>
     <string name="error_missing_base_url">The server URL in the settings is not valid.</string>
     <string name="error_missing_model">Choose a model in the settings.</string>
@@ -134,6 +135,15 @@
     <string name="field_model">Model</string>
     <string name="model_small">Small: recommended</string>
     <string name="model_medium">Medium</string>
+    <string name="setting_reasoning">Reasoning</string>
+    <string name="setting_reasoning_description">The model thinks before it answers: better on hard text, but several times slower. Select the text box so answers stay short.</string>
+    <string name="setting_reasoning_effort">Reasoning effort</string>
+    <string name="setting_reasoning_effort_description">Default sends nothing and keeps the model\'s own setting. If the server refuses it, the request is sent again without it.</string>
+    <string name="reasoning_default">Default</string>
+    <string name="reasoning_none">None</string>
+    <string name="reasoning_low">Low</string>
+    <string name="reasoning_medium">Medium</string>
+    <string name="reasoning_high">High</string>
     <string name="settings_openai">OpenAI-compatible server</string>
     <string name="field_base_url">Base URL</string>
     <string name="field_base_url_hint">For example https://api.openai.com/v1, https://openrouter.ai/api/v1 or http://192.168.1.20:11434/v1 for Ollama.</string>

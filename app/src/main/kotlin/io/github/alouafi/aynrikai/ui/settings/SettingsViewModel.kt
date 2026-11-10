@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import io.github.alouafi.aynrikai.analysis.ScreenReaderFactory
 import io.github.alouafi.aynrikai.appContainer
 import io.github.alouafi.aynrikai.llm.ChatRequest
+import io.github.alouafi.aynrikai.llm.TruncatedAnswerException
 import io.github.alouafi.aynrikai.settings.Settings
 import io.github.alouafi.aynrikai.settings.SettingsRepository
 import io.github.alouafi.aynrikai.ui.ScanError
@@ -56,6 +57,9 @@ class SettingsViewModel(
         viewModelScope.launch {
             connectionCheck = try {
                 readerFactory.chatModel(current).complete(PING)
+                ConnectionCheck.Success
+            } catch (_: TruncatedAnswerException) {
+                // The model answered, so the key, URL and model work. Reasoning used up the tiny token budget.
                 ConnectionCheck.Success
             } catch (e: CancellationException) {
                 throw e

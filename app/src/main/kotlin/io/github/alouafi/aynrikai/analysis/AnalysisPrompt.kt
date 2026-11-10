@@ -1,6 +1,8 @@
 package io.github.alouafi.aynrikai.analysis
 
-/** Prompts that ask a model for an [Analysis] as JSON. `language` is an English language name. */
+import kotlinx.serialization.json.Json
+
+/** Prompts that ask a model for an [Analysis], or for translations, as JSON. `language` is an English language name. */
 object AnalysisPrompt {
 
     const val SCREENSHOT_REQUEST = "Read the Japanese text on this game screen."
@@ -19,6 +21,24 @@ object AnalysisPrompt {
     fun forText(language: String): String = prompt(TEXT, ANALYSIS_SHAPE, analysisRules(language) + TEXT.empty)
 
     fun textRequest(texts: List<String>): String = texts.joinToString("\n")
+
+    /**
+     * Translates lines that were already read, without words or grammar notes. The answer is a fraction of a full
+     * analysis, so it comes back in a few seconds.
+     */
+    fun forTranslation(language: String): String = listOf(
+        "You help a player read a Japanese video game. You receive the Japanese text read from the game screen, " +
+            "as a JSON array of lines.",
+        "Answer with one JSON object and nothing else, using exactly this shape:",
+        TRANSLATION_SHAPE,
+        "",
+        "Rules:",
+        "- translations: a natural $language translation of each line that suits a game, exactly one per line and " +
+            "in the same order. Translate each line in the context of the others.",
+    ).joinToString("\n")
+
+    /** The lines as a JSON array, so the model knows exactly how many translations to give. */
+    fun translationRequest(texts: List<String>): String = Json.encodeToString(texts)
 
     /** Where the Japanese text comes from, and how to copy it. */
     private class Source(val intro: String, val lines: String, val japanese: String, val empty: String)
@@ -45,6 +65,8 @@ object AnalysisPrompt {
     )
 
     private const val TRANSCRIPTION_SHAPE = "{\"lines\":[{\"japanese\":\"\"}]}"
+
+    private const val TRANSLATION_SHAPE = "{\"translations\":[\"\"]}"
 
     private const val ANALYSIS_SHAPE = "{\"lines\":[{\"japanese\":\"\",\"translation\":\"\",\"grammar\":\"\"," +
         "\"tokens\":[{\"surface\":\"\",\"reading\":\"\",\"base\":\"\",\"meaning\":\"\",\"pos\":\"\"}]}]}"

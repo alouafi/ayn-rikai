@@ -23,15 +23,27 @@ enum class TextSource {
 
 enum class Provider { MISTRAL, OPENAI_COMPATIBLE }
 
+/** The `reasoning_effort` sent to OpenAI-compatible servers. [DEFAULT] sends none and keeps the model's own. */
+enum class ReasoningEffort(val apiValue: String?) {
+    DEFAULT(null),
+    NONE("none"),
+    LOW("low"),
+    MEDIUM("medium"),
+    HIGH("high"),
+}
+
 data class Settings(
     val mode: Mode = Mode.TRANSLATE,
     val textSource: TextSource = TextSource.VISION_MODEL,
     val provider: Provider = Provider.MISTRAL,
     val mistralApiKey: String = "",
     val mistralModel: String = DEFAULT_MISTRAL_MODEL,
+    /** Mistral models reason at one level, `high`, or not at all, which is their default. */
+    val mistralReasoning: Boolean = false,
     val openAiBaseUrl: String = DEFAULT_OPENAI_BASE_URL,
     val openAiApiKey: String = "",
     val openAiModel: String = "",
+    val openAiReasoningEffort: ReasoningEffort = ReasoningEffort.DEFAULT,
     /** BCP 47 tag of the translation language. */
     val targetLanguage: String = defaultTargetLanguage(),
     val showFurigana: Boolean = true,

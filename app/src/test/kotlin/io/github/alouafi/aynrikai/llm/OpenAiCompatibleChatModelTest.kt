@@ -31,12 +31,12 @@ class OpenAiCompatibleChatModelTest {
     @After
     fun stop() = server.close()
 
-    private fun model(apiKey: String = "secret", basePath: String = "/v1") =
-        OpenAiCompatibleChatModel(http, server.url(basePath), apiKey, "test-model")
+    private fun model(apiKey: String = "secret", basePath: String = "/v1", reasoningEffort: String? = null) =
+        OpenAiCompatibleChatModel(http, server.url(basePath), apiKey, "test-model", reasoningEffort)
 
-    private fun answer(content: String) = MockResponse.Builder()
+    private fun answer(content: String, finishReason: String = "stop") = MockResponse.Builder()
         .code(200)
-        .body("""{"choices":[{"message":{"role":"assistant","content":$content}}]}""")
+        .body("""{"choices":[{"message":{"role":"assistant","content":$content},"finish_reason":"$finishReason"}]}""")
         .build()
 
     private fun error(code: Int, body: String) = MockResponse.Builder().code(code).body(body).build()
@@ -66,6 +66,7 @@ class OpenAiCompatibleChatModelTest {
         assertEquals("test-model", body["model"]!!.jsonPrimitive.content)
         assertEquals("100", body["max_tokens"]!!.jsonPrimitive.content)
         assertEquals("json_object", body["response_format"]!!.jsonObject["type"]!!.jsonPrimitive.content)
+        assertFalse(body.containsKey("reasoning_effort"))
         val messages = body["messages"]!!.jsonArray
         assertEquals("Read the screen.", messages[0].jsonObject["content"]!!.jsonPrimitive.content)
         val parts = messages[1].jsonObject["content"]!!.jsonArray
@@ -111,11 +112,33 @@ class OpenAiCompatibleChatModelTest {
         assertTrue(first.containsKey("max_tokens") && first.containsKey("response_format") && first.containsKey("temperature"))
         val second = server.takeRequest().json()
         assertFalse(second.containsKey("max_tokens"))
-        assertEquals("4096", second["max_completion_tokens"]!!.jsonPrimitive.content)
+        assertEquals("16384", second["max_completion_tokens"]!!.jsonPrimitive.content)
         assertFalse(server.takeRequest().json().containsKey("response_format"))
         val last = server.takeRequest().json()
         assertFalse(last.containsKey("response_format") || last.containsKey("temperature"))
         assertTrue(last.containsKey("max_completion_tokens"))
+    }
+
+    @Test
+    fun `sends the reasoning effort, and drops it when the model has no reasoning`() = runTest {
+        server.enqueue(error(400, """{"message":"reasoning_effort='low' is not supported for this model."}"""))
+        server.enqueue(answer("\"ok\""))
+
+        assertEquals("ok", model(reasoningEffort = "low").complete(textRequest))
+
+        assertEquals("low", server.takeRequest().json()["reasoning_effort"]!!.jsonPrimitive.content)
+        val retry = server.takeRequest().json()
+        assertFalse(retry.containsKey("reasoning_effort"))
+        assertTrue(retry.containsKey("max_tokens") && retry.containsKey("response_format"))
+    }
+
+    @Test
+    fun `an answer cut off at the token limit is reported as such`() = runTest {
+        server.enqueue(answer("\"{\\\"lines\\\":[\"", finishReason = "length"))
+
+        val error = runCatching { model().complete(textRequest) }.exceptionOrNull()
+
+        assertTrue(error is TruncatedAnswerException)
     }
 
     @Test

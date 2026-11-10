@@ -26,10 +26,14 @@ class ScreenReaderFactory(
         // One request reads and translates the screenshot.
         settings.textSource == TextSource.VISION_MODEL ->
             VisionScreenReader(chatModel(settings), AnalysisPrompt.forScreenshot(settings.targetLanguageName()))
-        else -> AnalyzingScreenReader(transcriber(settings), analyzer(settings))
+        else -> AnalyzingScreenReader(
+            transcriber(settings),
+            TextAnalyzer(chatModel(settings), settings.targetLanguageName()),
+        )
     }
 
-    fun analyzer(settings: Settings): TextAnalyzer = TextAnalyzer(chatModel(settings), settings.targetLanguageName())
+    /** Translates the lines of a transcription: the screenshot is not sent again. */
+    fun translator(settings: Settings): LineTranslator = LineTranslator(chatModel(settings), settings.targetLanguageName())
 
     fun chatModel(settings: Settings): ChatModel = when (settings.provider) {
         Provider.MISTRAL -> OpenAiCompatibleChatModel(
@@ -37,6 +41,7 @@ class ScreenReaderFactory(
             MISTRAL_API,
             mistralKey(settings),
             settings.mistralModel.trim().ifEmpty { Settings.DEFAULT_MISTRAL_MODEL },
+            reasoningEffort = if (settings.mistralReasoning) "high" else null,
         )
         Provider.OPENAI_COMPATIBLE -> OpenAiCompatibleChatModel(
             http,
@@ -44,6 +49,7 @@ class ScreenReaderFactory(
                 ?: throw MissingConfigurationException(MissingSetting.OPENAI_BASE_URL),
             settings.openAiApiKey.trim(),
             settings.openAiModel.trim().ifEmpty { throw MissingConfigurationException(MissingSetting.OPENAI_MODEL) },
+            reasoningEffort = settings.openAiReasoningEffort.apiValue,
         )
     }
 

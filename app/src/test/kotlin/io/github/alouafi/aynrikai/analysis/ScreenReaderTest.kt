@@ -82,4 +82,25 @@ class ScreenReaderTest {
         assertEquals("はい", model.requests.single().user)
         assertEquals("Yes", analysis.lines.single().translation)
     }
+
+    @Test
+    fun `line translator asks for translations of the lines as text`() = runTest {
+        val model = RecordingModel("""{"translations":["Oui","Menu"]}""")
+
+        val translations = LineTranslator(model, "French").translate(listOf("はい", "メニュー"))
+
+        val request = model.requests.single()
+        assertNull(request.image)
+        assertEquals(AnalysisPrompt.forTranslation("French"), request.system)
+        assertEquals("""["はい","メニュー"]""", request.user)
+        assertEquals(listOf("Oui", "Menu"), translations)
+    }
+
+    @Test
+    fun `line translator skips the model when there is no text`() = runTest {
+        val model = RecordingModel(answer)
+
+        assertTrue(LineTranslator(model, "English").translate(emptyList()).isEmpty())
+        assertTrue(model.requests.isEmpty())
+    }
 }

@@ -2,6 +2,7 @@ package io.github.alouafi.aynrikai.llm
 
 import io.github.alouafi.aynrikai.net.ApiException
 import io.github.alouafi.aynrikai.net.postJson
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -20,12 +21,14 @@ import okhttp3.OkHttpClient
 /**
  * Talks to any `/chat/completions` endpoint that follows the OpenAI format:
  * Mistral, OpenAI, OpenRouter, Ollama, LM Studio, vLLM, llama.cpp...
+ * [reasoningEffort] is sent as `reasoning_effort` when it is not null.
  */
 class OpenAiCompatibleChatModel(
     private val http: OkHttpClient,
     baseUrl: HttpUrl,
     private val apiKey: String,
     private val model: String,
+    private val reasoningEffort: String? = null,
 ) : ChatModel {
 
     private val endpoint = baseUrl.newBuilder().addPathSegments("chat/completions").build()
@@ -35,6 +38,7 @@ class OpenAiCompatibleChatModel(
         RESPONSE_FORMAT("response_format"),
         TEMPERATURE("temperature"),
         MAX_TOKENS("max_tokens"),
+        REASONING_EFFORT("reasoning_effort"),
     }
 
     override suspend fun complete(request: ChatRequest): String {
@@ -43,7 +47,8 @@ class OpenAiCompatibleChatModel(
             try {
                 return send(request, rejected)
             } catch (e: ApiException) {
-                // The prompt alone is enough to get JSON, so retry without whatever the server refused.
+                // The prompt alone is enough to get JSON, and models answer without reasoning too, so retry
+                // without whatever the server refused.
                 val refused = Parameter.entries.filter { it !in rejected && e.rejects(it.key) }
                 if (refused.isEmpty()) throw e
                 rejected += refused
@@ -54,9 +59,11 @@ class OpenAiCompatibleChatModel(
     private fun ApiException.rejects(key: String): Boolean =
         status in 400..422 && message.orEmpty().contains(key, ignoreCase = true)
 
-    private suspend fun send(request: ChatRequest, rejected: Set<Parameter>): String =
-        http.postJson(endpoint, apiKey, requestBody(request, rejected), ChatAnswer.serializer())
-            .choices.first().message.text()
+    private suspend fun send(request: ChatRequest, rejected: Set<Parameter>): String {
+        val choice = http.postJson(endpoint, apiKey, requestBody(request, rejected), ChatAnswer.serializer()).choices.first()
+        if (choice.finishReason == "length") throw TruncatedAnswerException()
+        return choice.message.text()
+    }
 
     private fun requestBody(request: ChatRequest, rejected: Set<Parameter>): JsonObject = buildJsonObject {
         put("model", model)
@@ -64,6 +71,7 @@ class OpenAiCompatibleChatModel(
         // Recent OpenAI models only accept the newer name.
         put(if (Parameter.MAX_TOKENS in rejected) "max_completion_tokens" else "max_tokens", request.maxTokens)
         if (Parameter.RESPONSE_FORMAT !in rejected) putJsonObject("response_format") { put("type", "json_object") }
+        if (reasoningEffort != null && Parameter.REASONING_EFFORT !in rejected) put("reasoning_effort", reasoningEffort)
         putJsonArray("messages") {
             addJsonObject {
                 put("role", "system")
@@ -103,7 +111,7 @@ private class ChatAnswer(val choices: List<Choice>) {
 }
 
 @Serializable
-private class Choice(val message: Message)
+private class Choice(val message: Message, @SerialName("finish_reason") val finishReason: String? = null)
 
 @Serializable
 private class Message(val content: JsonElement = JsonNull) {

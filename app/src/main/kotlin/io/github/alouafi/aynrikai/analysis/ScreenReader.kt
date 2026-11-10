@@ -41,6 +41,18 @@ class TextAnalyzer(private val model: ChatModel, private val language: String) {
     }
 }
 
+/** Translates lines that were already read, and keeps them as they are. */
+class LineTranslator(private val model: ChatModel, private val language: String) {
+    /** One translation per line of [texts], in order. */
+    suspend fun translate(texts: List<String>): List<String> {
+        if (texts.isEmpty()) return emptyList()
+        val answer = model.complete(
+            ChatRequest(system = AnalysisPrompt.forTranslation(language), user = AnalysisPrompt.translationRequest(texts)),
+        )
+        return AnalysisParser.parseTranslations(answer, texts.size)
+    }
+}
+
 /** Reads the text with [transcriber], then translates it with [analyzer]. */
 class AnalyzingScreenReader(private val transcriber: ScreenReader, private val analyzer: TextAnalyzer) : ScreenReader {
     override suspend fun read(screen: ScreenImage): Analysis =

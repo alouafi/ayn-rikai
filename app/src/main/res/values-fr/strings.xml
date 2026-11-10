@@ -40,6 +40,7 @@
     <string name="error_no_capture">La capture d\'écran est arrêtée. Lancez-la pour scanner le jeu.</string>
     <string name="error_no_frame">L\'écran du jeu ne s\'est pas rafraîchi. Réessayez.</string>
     <string name="error_unreadable">La réponse du modèle est illisible. Réessayez, ou choisissez un modèle plus puissant.</string>
+    <string name="error_too_long">La réponse était trop longue et a été coupée. Sélectionnez seulement la boîte de dialogue avec l\'icône de recadrage, ou désactivez le raisonnement.</string>
     <string name="error_missing_mistral_key">Ajoutez votre clé d\'API Mistral dans les réglages.</string>
     <string name="error_missing_base_url">L\'URL du serveur dans les réglages n\'est pas valide.</string>
     <string name="error_missing_model">Choisissez un modèle dans les réglages.</string>
@@ -132,6 +133,15 @@
     <string name="field_model">Modèle</string>
     <string name="model_small">Small : recommandé</string>
     <string name="model_medium">Medium</string>
+    <string name="setting_reasoning">Raisonnement</string>
+    <string name="setting_reasoning_description">Le modèle réfléchit avant de répondre : meilleur sur les textes difficiles, mais plusieurs fois plus lent. Sélectionnez la boîte de dialogue pour garder des réponses courtes.</string>
+    <string name="setting_reasoning_effort">Effort de raisonnement</string>
+    <string name="setting_reasoning_effort_description">Par défaut, rien n\'est envoyé et le modèle garde son propre réglage. Si le serveur le refuse, la requête est renvoyée sans.</string>
+    <string name="reasoning_default">Par défaut</string>
+    <string name="reasoning_none">Aucun</string>
+    <string name="reasoning_low">Faible</string>
+    <string name="reasoning_medium">Moyen</string>
+    <string name="reasoning_high">Élevé</string>
     <string name="settings_openai">Serveur compatible OpenAI</string>
     <string name="field_base_url">URL de base</string>
     <string name="field_base_url_hint">Par exemple https://api.openai.com/v1, https://openrouter.ai/api/v1 ou http://192.168.1.20:11434/v1 pour Ollama.</string>

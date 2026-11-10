@@ -86,4 +86,19 @@ class AnalysisParserTest {
         assertThrows(MalformedAnalysisException::class.java) { AnalysisParser.parse("""{"lines":"none"}""") }
         assertThrows(MalformedAnalysisException::class.java) { AnalysisParser.parse("""{"lines":[{"japanese":""") }
     }
+
+    @Test
+    fun `parses one translation per line`() {
+        val answer = "```json\n{\"translations\":[\" Oui. \",\"Menu\"]}\n```"
+
+        assertEquals(listOf("Oui.", "Menu"), AnalysisParser.parseTranslations(answer, count = 2))
+    }
+
+    @Test
+    fun `rejects translations that do not match the lines`() {
+        val answer = """{"translations":["Oui. Menu"]}"""
+
+        assertThrows(MalformedAnalysisException::class.java) { AnalysisParser.parseTranslations(answer, count = 2) }
+        assertThrows(MalformedAnalysisException::class.java) { AnalysisParser.parseTranslations("{}", count = 1) }
+    }
 }

@@ -42,4 +42,23 @@ class AnalysisPromptTest {
     fun `text request puts one text per line`() {
         assertEquals("はい、わかりました。\nメニュー", AnalysisPrompt.textRequest(listOf("はい、わかりました。", "メニュー")))
     }
+
+    @Test
+    fun `translation prompt asks for translations only`() {
+        val prompt = AnalysisPrompt.forTranslation("Spanish")
+
+        assertTrue(prompt.contains("{\"translations\":[\"\"]}"))
+        assertTrue(prompt.contains("a natural Spanish translation of each line"))
+        assertTrue(prompt.contains("exactly one per line and in the same order"))
+        assertFalse(prompt.contains("tokens"))
+        assertFalse(prompt.contains("grammar"))
+    }
+
+    @Test
+    fun `translation request is a JSON array of the lines`() {
+        assertEquals(
+            """["「行くぞ」と言った。","メニュー"]""",
+            AnalysisPrompt.translationRequest(listOf("「行くぞ」と言った。", "メニュー")),
+        )
+    }
 }

@@ -27,7 +27,8 @@ such as OpenAI, OpenRouter, Ollama or LM Studio. It also has an offline mode wit
   **Scan**, and the Japanese text appears on the bottom screen.
 - **Two modes**, switched at the bottom of the screen:
   - **Transcribe** shows only the Japanese text, which is faster and cheaper. Tap
-    **Translate** under a scan when you need its translation.
+    **Translate** under a scan when you need its translation: it sends only the text and asks
+    only for one translation per line, so it answers in a few seconds.
   - **Translate** reads, translates and explains every line in one go.
 - **Tap any character.** The whole group it belongs to is highlighted: a word with all its
   endings, a compound or a set expression. You get its reading, romaji, meaning and dictionary
@@ -98,8 +99,12 @@ The **Read the text with** setting picks what reads the screenshot:
 | **On-device OCR** | Offline: nothing leaves the device. | OCR reads the text, then the model translates it. | Nothing online to transcribe |
 | **Mistral OCR** | Mistral OCR reads the text. | Mistral OCR reads the text, then the model translates it. | A Mistral API key |
 
-The **Translate** button under a transcription sends the text, not the screenshot, to the
-model.
+The **Translate** button under a transcription sends the text, not the screenshot, and adds a
+translation under each line. The lines keep their offline lookups. Furigana chips and grammar
+notes come with Translate mode.
+
+In Translate mode, a screen full of text takes an answer of about 4,000 tokens, which comes
+back in 20 to 30 seconds. Selecting the text box makes it much shorter.
 
 OCR engines:
 
@@ -122,6 +127,12 @@ OCR engines:
 
   The vision model source needs a model that accepts images. The OCR sources work with
   text-only models.
+- **Reasoning** is off by default. With Mistral, the **Reasoning** switch makes the model
+  think before it answers (`reasoning_effort: high`, the only level Mistral offers). It can
+  help on hard text, but answers take several times longer, so select the text box. On a
+  full screen, Medium with reasoning can run past the answer limit. For OpenAI-compatible
+  servers, **Reasoning effort** sends `none`, `low`, `medium` or `high`, or nothing with
+  **Default**. If a server refuses it, the app sends the request again without it.
 
 Each scan that goes online sends one JPEG of the game screen, at most 1600 px on the long
 side. With a region, it sends only the region.
@@ -178,13 +189,18 @@ scripts/build_word_data.py    rebuilds app/src/main/assets/words.tsv and word_in
 
 ## Status
 
-Version 0.2.0 was tested on an Android 13 emulator set up like the Thor: a 1920×1080 main
-screen and a 1240×1080 second screen. The tests covered:
+Version 0.3.0 was tested on an Android 13 emulator set up like the Thor: a 1920×1080 main
+screen and a 1240×1080 second screen. It was tested with Mistral Small on a screen full of text:
+a menu, an item list and a dialogue. The tests covered:
 
-- Transcribe with every text source (vision model, on-device OCR, Mistral OCR), Translate
-  with the vision model and Mistral OCR, the Translate button, tap lookups and kanji pages.
+- 0.3.0: Translate with the vision model, with and without reasoning, Transcribe with the
+  vision model, the Translate button, tap lookups on translated lines, and the connection test
+  with reasoning on.
+- Tested with 0.2.0: Transcribe with on-device OCR and Mistral OCR, Translate with Mistral
+  OCR, and kanji pages.
 - Tested with 0.1.0 only: the OpenAI-compatible provider, Auto, the region editor and
-  controller focus staying on the game.
+  controller focus staying on the game. The reasoning effort setting for OpenAI-compatible
+  servers has unit tests but was not tried on a server.
 
 It has not been tested on a real AYN Thor yet. Issues and pull requests are welcome.
 
